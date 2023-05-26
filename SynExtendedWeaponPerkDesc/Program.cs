@@ -111,12 +111,19 @@ namespace SynExtendedWeaponPerkDesc
                 perkDescStr = perkDescStr.Replace("Battle axe","battleaxe",true,null);
                 perkDescStr = perkDescStr.Replace("War axe","waraxe",true,null);
 
-                var perkOverride = state.PatchMod.Perks.GetOrAddAsOverride(perk);
-                perkOverride.Description = wPerkReplacer(perkDescStr,baseWeapTypes);
-                Console.WriteLine($"{perk.FormKey}: Patched");
+                
+                bool modified = false;
+                string line = wPerkReplacer(perkDescStr,baseWeapTypes,out modified);
+                if(modified)
+                {
+                    var perkOverride = state.PatchMod.Perks.GetOrAddAsOverride(perk);
+                    perkOverride.Description = line;
+                    Console.WriteLine($"{perk.FormKey}: Patched");
+                }
+                
             }
         }
-        public static string wPerkReplacer(string perkDesc,Dictionary<string,List<string>> baseWeapTypes)
+        public static string wPerkReplacer(string perkDesc,Dictionary<string,List<string>> baseWeapTypes,out bool modified)
         {
             if(baseWeapTypes == null)
             {
@@ -125,7 +132,7 @@ namespace SynExtendedWeaponPerkDesc
             string[] cutArray = perkDesc.Split(' ');
             perkDesc = perkDesc.ToLower();
             string[] cutNew = perkDesc.Split(' ');
-
+            modified = false;
             foreach (string cWType in baseWeapTypes.Keys)
             {
                 if((cWType!="sword"&&perkDesc.Contains(cWType))||(cWType=="sword"&&perkDesc.Contains(cWType)&&!perkDesc.Contains("greatsword")))
@@ -143,6 +150,7 @@ namespace SynExtendedWeaponPerkDesc
                             cutArray[i] = cutArray[i]+$" and {baseWeapTypes[cWType][baseWeapTypes[cWType].Count-1]}";
                         }
                     }
+                    modified=true;
 //                    Console.WriteLine(string.Join(' ',cutArray));
                 }
             }
