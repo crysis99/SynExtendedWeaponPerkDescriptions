@@ -118,7 +118,7 @@ namespace SynExtendedWeaponPerkDesc
                 {
                     var perkOverride = state.PatchMod.Perks.GetOrAddAsOverride(perk);
                     perkOverride.Description = line;
-                    Console.WriteLine($"{perk.FormKey}: Patched");
+                    Console.WriteLine($"{perk.FormKey}:\nChanged Perk: {line}");
                 }
                 
             }
@@ -135,13 +135,17 @@ namespace SynExtendedWeaponPerkDesc
             modified = false;
             foreach (string cWType in baseWeapTypes.Keys)
             {
-                if((cWType!="sword"&&perkDesc.Contains(cWType))||(cWType=="sword"&&perkDesc.Contains(cWType)&&!perkDesc.Contains("greatsword")))
+                if(((cWType!="sword"&&perkDesc.Contains(cWType))||(cWType=="sword"&&perkDesc.Contains(cWType)&&!perkDesc.Contains("greatsword")))&&baseWeapTypes[cWType].Count>1)
                 {
 
                     for(int i = 0;i<cutArray.Count();i++)
                     {
-                        if(((cWType!="sword"&&cutNew[i].Contains(cWType))||(cWType=="sword"&&cutNew[i].Contains(cWType)&&!cutNew[i].Contains("greatsword")))&&baseWeapTypes[cWType].Count>1)
+                        if(((cWType!="sword"&&cutNew[i].Contains(cWType))||(cWType=="sword"&&cutNew[i].Contains(cWType)&&!cutNew[i].Contains("greatsword"))))
                         {
+                            if(i>0)
+                            {
+                                if(cutNew[i-1]=="a"){cutArray[i-1]="";}
+                            }
                             cutArray[i]=baseWeapTypes[cWType][0];
                             for(int j = 1;j<baseWeapTypes[cWType].Count-1;j++)
                             {
@@ -154,7 +158,8 @@ namespace SynExtendedWeaponPerkDesc
 //                    Console.WriteLine(string.Join(' ',cutArray));
                 }
             }
-            return string.Join(' ',cutArray);
+
+            return string.Join(' ',cutArray.Where(x => !string.IsNullOrEmpty(x)).ToArray());
         }
 
     }
