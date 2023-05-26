@@ -97,7 +97,7 @@ namespace SynExtendedWeaponPerkDesc
             if(weapEnabled["Trident"]){baseWeapTypes["greatsword"].Add("Tridents");}
             if(weapEnabled["Glaive"]){baseWeapTypes["greatsword"].Add("Glaives");}
             if(weapEnabled["Spear"]){baseWeapTypes["greatsword"].Add("Spears");}
-            if(weapEnabled["Spear"]){baseWeapTypes["greatsword"].Add("Shortspears");}
+            if(weapEnabled["Spear"]){baseWeapTypes["sword"].Add("Shortspears");}
             if(weapEnabled["Pike"]){baseWeapTypes["greatsword"].Add("Pikes");}
             if(weapEnabled["Hatchet"]){baseWeapTypes["waraxe"].Add("Hatchets");}
             if(weapEnabled["Rapier"]){baseWeapTypes["sword"].Add("Rapiers");}
