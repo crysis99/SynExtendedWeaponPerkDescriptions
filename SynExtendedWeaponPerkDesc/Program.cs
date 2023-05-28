@@ -63,7 +63,8 @@ namespace SynExtendedWeaponPerkDesc
         //     Spear,
         //     Poleaxe,
         //     Halberd,
-        //     Quarterstaff
+        //     Quarterstaff,
+        //     Twinblade
         // }
         public static WeapType[] weapTypeArr = 
         {
@@ -81,7 +82,8 @@ namespace SynExtendedWeaponPerkDesc
             new WeapType("Spear","06D931"),
             new WeapType("Poleaxe","06D932"),
             new WeapType("Halberd","06D932"),
-            new WeapType("Quarterstaff","06D930")
+            new WeapType("Quarterstaff","06D930"),
+            new WeapType("Twinblade","06D931")
         };
         //Going by animated heavy armoury basically halfpikes = pikes so not gonna have its own category
         /*
