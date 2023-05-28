@@ -2,7 +2,7 @@
   "Nickname": "",
   "Visibility": "Visible",
   "OneLineDescription": "Add weapons such as Spears,Halberds, Claws, etc to perk descriptions.",
-  "LongDescription": "Goes through your modlist and sees if any Weapon has Spear, Claws, etc in their name and adds the weapon type to perk descriptions.\r\nE.g. Battleaxes become Battleaxes, Scythes, Halberds if Scythe and Halberd weapons are found.\r\nWhich base class it belongs to is hardcoded, and I based it primarily off of Animated and Heavy Armouy.",
+  "LongDescription": "Goes through your modlist and sees if any Weapon has Spear, Claws, etc in their name and has the corresponding WeapType Keyword attatched and adds the weapon type to perk descriptions.\r\nE.g. Battleaxes become Battleaxes, Scythes, Halberds if Scythe and Halberd weapons are found.\r\nWhich base class it belongs to is hardcoded, and I based it primarily off of Animated and Heavy Armouy.\nDo not use with ANY mod that adds extra weapons to perk descriptions already, I don't do checks for that and it will duplicate. ",
   "PreferredAutoVersioning": "Default",
   "RequiredMods": [],
   "TargetedReleases": [

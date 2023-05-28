@@ -7,8 +7,92 @@ namespace SynExtendedWeaponPerkDesc
 {
     public class Program
     {   
+        public class WeapType
+        {
+            public string Name;
+            public FormKey baseFormKey;
+            public string baseCat;
+            public bool enabled;
 
-
+            public WeapType (string name,string formKey)
+            {
+                this.Name = name;
+                switch (formKey)
+                {
+                    case "06D932":
+                        baseCat = "battleaxe";
+                        break;
+                    case "01E713":
+                        baseCat = "dagger";
+                        break;
+                    case "06D931":
+                        baseCat = "greatsword";
+                        break;
+                    case "01E714":
+                        baseCat = "mace";
+                        break;
+                    case "01E711":
+                        baseCat = "sword";
+                        break;
+                    case "01E712":
+                        baseCat = "waraxe";
+                        break;
+                    case "06D930":
+                        baseCat = "warhammer";
+                        break;
+                    default:
+                        throw new ArgumentException();
+                }
+                this.baseFormKey = FormKey.Factory($"{formKey}:Skyrim.esm");
+                this.enabled = false;
+            }
+        }
+        // enum weapTypeEnum
+        // {
+        //     Claw,
+        //     Scythe,
+        //     Whip,
+        //     Javelin,
+        //     Maul,
+        //     Club,
+        //     Hatchet,
+        //     Glaive,
+        //     Trident,
+        //     Rapier,
+        //     Pike,
+        //     Spear,
+        //     Poleaxe,
+        //     Halberd,
+        //     Quarterstaff
+        // }
+        public static WeapType[] weapTypeArr = 
+        {
+            new WeapType("Claw","01E711"),
+            new WeapType("Scythe","06D932"),
+            new WeapType("Whip","01E711"),
+            new WeapType("Javelin","01E711"),
+            new WeapType("Maul","06D930"),
+            new WeapType("Club","06D930"),
+            new WeapType("Hatchet","01E712"),
+            new WeapType("Glaive","06D931"),
+            new WeapType("Trident","06D931"),
+            new WeapType("Rapier","01E711"),
+            new WeapType("Pike","06D931"),
+            new WeapType("Spear","06D931"),
+            new WeapType("Poleaxe","06D932"),
+            new WeapType("Halberd","06D932"),
+            new WeapType("Quarterstaff","06D930")
+        };
+        //Going by animated heavy armoury basically halfpikes = pikes so not gonna have its own category
+        /*
+        0 = WeapTypeBattleaxe [KYWD:0006D932]
+        1 = WeapTypeDagger [KYWD:0001E713]
+        2 = WeapTypeGreatsword [KYWD:0006D931]
+        3 = WeapTypeMace [KYWD:0001E714]
+        4 = WeapTypeSword [KYWD:0001E711]
+        5 = WeapTypeWarAxe [KYWD:0001E712]
+        6 = WeapTypeWarhammer [KYWD:0006D930]
+        */
         public static async Task<int> Main(string[] args)
         {
             return await SynthesisPipeline.Instance
@@ -19,47 +103,26 @@ namespace SynExtendedWeaponPerkDesc
 
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
-            var itemLink = new FormLink<IItemGetter>(FormKey.Factory("01E711:Skyrim.esm"));
+            var itemLink = new FormLink<IKeywordGetter>(FormKey.Factory("01E716:Skyrim.esm"));
+            if (!itemLink.TryResolve<IKeywordGetter>(state.LinkCache, out var weapTypeStaffKeyw))
+            {
+                throw new ArgumentException();
+            }
 
-            if (itemLink.TryResolve<IKeywordGetter>(state.LinkCache, out var itemRecord))
-            {
-                //Console.WriteLine($"Was able to find the item record object: {itemRecord}");
-            }            
-            IDictionary<string,bool> weapEnabled = new Dictionary<string,bool>()
-            {
-                {"Claw",false},
-                {"Scythe",false},
-                {"Whip",false},
-                {"Javelin",false},
-                {"Maul",false},
-                {"Club",false},
-                {"Hatchet",false},
-                {"Glaive",false},
-                {"Trident",false},
-                {"Rapier",false},
-                {"Pike",false},
-                {"HalfPike",false},
-                {"Spear",false},
-                {"Poleaxe",false},
-                {"Halberd",false},
-                {"Quarterstaff",false},
-            };
             foreach (IWeaponGetter weap in state.LoadOrder.PriorityOrder.OnlyEnabled().Weapon().WinningOverrides())
             {
-
-                if(itemRecord==null){continue;}
+                
                 if(weap.Name == null){continue;}
                 string weapName = weap.Name.String ?? "";
-                if(weapName.Contains("Staff")||weap.MajorFlags.HasFlag(Weapon.MajorFlag.NonPlayable)){continue;}
-                if(weapName.Contains("Claw")&&weap.HasKeyword(itemRecord)||(weap.EditorID ?? "").ToLower().Contains("dummy")){continue;}//Console.WriteLine($"{weapName}:{weap.EditorID}:Excluded");continue;}
-                foreach(string weapType in weapEnabled.Keys)
+                if(weap.HasKeyword(weapTypeStaffKeyw)||weap.MajorFlags.HasFlag(Weapon.MajorFlag.NonPlayable)||(weap.EditorID ?? "").Contains("dummy",StringComparison.InvariantCultureIgnoreCase)||weapName.Trim() == ""||weap.Keywords==null){continue;}
+                for(int l = 0; l<weapTypeArr.Count();l++)
                 {
-                    if(!weapEnabled[weapType])
+                    if(!weapTypeArr[l].enabled)
                     {
-                        if(weapName.Contains(weapType))
+                        if(weapName.Contains(weapTypeArr[l].Name,StringComparison.InvariantCultureIgnoreCase)&&weap.HasKeyword(weapTypeArr[l].baseFormKey))
                         {
-                            weapEnabled[weapType]=true;
-                            Console.WriteLine($"Weapon Type: {weapType} found");
+                            weapTypeArr[l].enabled=true;
+                            Console.WriteLine($"Weapon Type: {weapTypeArr[l].Name} found");
                             // if(weap.Keywords!=null){
                             //     foreach(var keyw in weap.Keywords)
                             //     {
@@ -86,21 +149,28 @@ namespace SynExtendedWeaponPerkDesc
             baseWeapTypes["greatsword"].Add("Greatswords");
             baseWeapTypes["warhammer"] = new List<string>();
             baseWeapTypes["warhammer"].Add("Warhammers");
-            if(weapEnabled["Claw"]){baseWeapTypes["dagger"].Add("Claws");}
-            if(weapEnabled["Scythe"]){baseWeapTypes["battleaxe"].Add("Scythes");}
-            if(weapEnabled["Halberd"]){baseWeapTypes["battleaxe"].Add("Halberds");}
-            if(weapEnabled["Whip"]){baseWeapTypes["sword"].Add("Whips");}
-            if(weapEnabled["Javelin"]){baseWeapTypes["sword"].Add("Javelins");}
-            if(weapEnabled["Maul"]){baseWeapTypes["warhammer"].Add("Mauls");}
-            if(weapEnabled["Club"]){baseWeapTypes["warhammer"].Add("Clubs");}
-            if(weapEnabled["Quarterstaff"]){baseWeapTypes["warhammer"].Add("Quarterstaves");}
-            if(weapEnabled["Trident"]){baseWeapTypes["greatsword"].Add("Tridents");}
-            if(weapEnabled["Glaive"]){baseWeapTypes["greatsword"].Add("Glaives");}
-            if(weapEnabled["Spear"]){baseWeapTypes["greatsword"].Add("Spears");}
-            if(weapEnabled["Spear"]){baseWeapTypes["sword"].Add("Shortspears");}
-            if(weapEnabled["Pike"]){baseWeapTypes["greatsword"].Add("Pikes");}
-            if(weapEnabled["Hatchet"]){baseWeapTypes["waraxe"].Add("Hatchets");}
-            if(weapEnabled["Rapier"]){baseWeapTypes["sword"].Add("Rapiers");}
+            foreach(WeapType weapType in weapTypeArr)
+            {
+                if (!weapType.enabled){continue;}
+                else if(weapType.Name=="Quarterstaff")
+                {
+                    baseWeapTypes[weapType.baseCat].Add("Quarterstaves");
+                }
+                else 
+                {
+                    baseWeapTypes[weapType.baseCat].Add(weapType.Name+"s");
+                }
+            }
+            foreach(string list in baseWeapTypes.Keys)
+            {
+                Console.Write($"List Cat: {list}\n");
+                foreach (string listkey in baseWeapTypes[list])
+                {
+                    Console.Write(listkey+",");
+                }
+                Console.Write("\n");
+            }
+
 
             foreach (IPerkGetter perk in state.LoadOrder.PriorityOrder.OnlyEnabled().Perk().WinningOverrides())
             {
@@ -110,7 +180,6 @@ namespace SynExtendedWeaponPerkDesc
                 perkDescStr = perkDescStr.Replace("War Hammer","warhammer",true,null);
                 perkDescStr = perkDescStr.Replace("Battle axe","battleaxe",true,null);
                 perkDescStr = perkDescStr.Replace("War axe","waraxe",true,null);
-
                 
                 bool modified = false;
                 string line = wPerkReplacer(perkDescStr,baseWeapTypes,out modified);
@@ -118,7 +187,7 @@ namespace SynExtendedWeaponPerkDesc
                 {
                     var perkOverride = state.PatchMod.Perks.GetOrAddAsOverride(perk);
                     perkOverride.Description = line;
-                    Console.WriteLine($"{perk.FormKey}:\nChanged Perk: {line}");
+                    Console.WriteLine($"{perk.FormKey}:{perk.Name}\nChanged Perk: {line}");
                 }
                 
             }
@@ -130,21 +199,19 @@ namespace SynExtendedWeaponPerkDesc
                 throw new System.ArgumentNullException();
             }
             string[] cutArray = perkDesc.Split(' ');
-            perkDesc = perkDesc.ToLower();
-            string[] cutNew = perkDesc.Split(' ');
             modified = false;
             foreach (string cWType in baseWeapTypes.Keys)
             {
-                if(((cWType!="sword"&&perkDesc.Contains(cWType))||(cWType=="sword"&&perkDesc.Contains(cWType)&&!perkDesc.Contains("greatsword")))&&baseWeapTypes[cWType].Count>1)
+                if(((cWType!="sword"&&perkDesc.Contains(cWType,StringComparison.InvariantCultureIgnoreCase))||(cWType=="sword"&&perkDesc.Contains(cWType)&&!perkDesc.Contains("greatsword",StringComparison.InvariantCultureIgnoreCase)))&&baseWeapTypes[cWType].Count>1)
                 {
 
                     for(int i = 0;i<cutArray.Count();i++)
                     {
-                        if(((cWType!="sword"&&cutNew[i].Contains(cWType))||(cWType=="sword"&&cutNew[i].Contains(cWType)&&!cutNew[i].Contains("greatsword"))))
+                        if(((cWType!="sword"&&cutArray[i].Contains(cWType,StringComparison.InvariantCultureIgnoreCase))||(cWType=="sword"&&cutArray[i].Contains(cWType,StringComparison.InvariantCultureIgnoreCase)&&!cutArray[i].Contains("greatsword",StringComparison.InvariantCultureIgnoreCase))))
                         {
                             if(i>0)
                             {
-                                if(cutNew[i-1]=="a"){cutArray[i-1]="";}
+                                if(cutArray[i-1]=="a"){cutArray[i-1]="";}
                             }
                             cutArray[i]=baseWeapTypes[cWType][0];
                             for(int j = 1;j<baseWeapTypes[cWType].Count-1;j++)
